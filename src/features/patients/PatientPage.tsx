@@ -1,12 +1,14 @@
 import { Link, useParams } from 'react-router';
 import { ApiError } from '../../api/client';
-import { usePatient } from '../../api/queries';
+import { usePatient, useReferenceConfig } from '../../api/queries';
 import { EmptyState, ErrorState, LoadingState } from '../../components/AsyncStates';
 import { formatSex } from '../../lib/format';
+import { ResultHistory } from '../history/ResultHistory';
 
 export function PatientPage() {
   const { patientId = '' } = useParams();
   const patient = usePatient(patientId);
+  const config = useReferenceConfig();
 
   if (patient.isPending) return <LoadingState label="Loading patient…" lines={2} />;
 
@@ -48,6 +50,28 @@ export function PatientPage() {
           </div>
         </dl>
       </header>
+
+      {config.isPending && <LoadingState label="Loading reference ranges…" lines={6} />}
+      {config.isError && (
+        <ErrorState
+          title="Couldn’t load reference ranges."
+          message="Results can’t be entered or flagged without them."
+          onRetry={() => void config.refetch()}
+          isRetrying={config.isFetching}
+        />
+      )}
+      {config.isSuccess && (
+        <>
+          <section className="panel" aria-labelledby="history-title">
+            <div className="panel__header">
+              <h2 id="history-title" className="panel__title">
+                History
+              </h2>
+            </div>
+            <ResultHistory patient={data} config={config.data} />
+          </section>
+        </>
+      )}
     </article>
   );
 }
