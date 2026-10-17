@@ -1,0 +1,54 @@
+/*
+ * Design tokens. A cool, ruled "lab request form" look: white form sheets on
+ * a pale blue-grey desk, navy ink, and colour reserved for clinical meaning.
+ * Severity colours are only ever used together with a text label.
+ */
+:root {
+  /* Surfaces and ink */
+  --paper: #eef2f5;
+  --surface: #ffffff;
+  --ink: #15253b;
+  --ink-muted: #56677d;
+  --rule: #d3dce5;
+  --rule-strong: #b7c4d1;
+
+  /* Actions */
+  --action: #1d4e89;
+  --action-hover: #163d6c;
+  --focus: #1d4e89;
+
+  /* Clinical meaning */
+  --normal-ink: #2d6a4f;
+  --normal-band: #a8d5be;
+  --abnormal-ink: #8a4b00;
+  --abnormal-tint: #fff0d6;
+  --abnormal-edge: #e9b865;
+  --abnormal-band: #f2c27b;
+  --critical-fill: #b0172f;
+  --critical-tint: #fce8eb;
+  --critical-band: #e8899a;
+  --invalid-ink: #a1122b;
+  --success-ink: #2d6a4f;
+  --success-tint: #e3f1ea;
+  --warning-tint: #fff6e5;
+
+  /* Type */
+  --font-body: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+
+  /* Space and shape */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  --sidebar-width: 19rem;
+}
