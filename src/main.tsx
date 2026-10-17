@@ -5,6 +5,7 @@ import '@fontsource/atkinson-hyperlegible-next/700.css';
 import './styles/tokens.css';
 import './styles/app.css';
 import { App } from './app/App';
+import { MockApiPanel } from './mocks/MockApiPanel';
 
 const container = document.getElementById('root')!;
 
@@ -15,7 +16,7 @@ async function bootstrap() {
 
   createRoot(container).render(
     <StrictMode>
-      <App />
+      <App devtools={<MockApiPanel />} />
     </StrictMode>,
   );
 }
