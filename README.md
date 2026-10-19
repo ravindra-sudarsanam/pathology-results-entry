@@ -6,7 +6,7 @@ A nurse picks a patient, types vitals and lab values, and sees each value flagge
 
 ![Results entry with live flags](docs/screenshots/live-flags.png)
 
-> **Demo:** _add your deployed link here_ (see [Deploying](#deploying)). Screenshots of every key flow are in [Demo screenshots](#demo-screenshots).
+> **Demo:** [https://pathology-results-entry.vercel.app](https://pathology-results-entry.vercel.app) · Screenshots of all primary workflows are available in [Demo screenshots](#demo-screenshots).
 
 ---
 
