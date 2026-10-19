@@ -50,6 +50,7 @@ export function ParameterField({
           name={parameter.id}
           type="text"
           inputMode="decimal"
+          placeholder="Not measured"
           autoComplete="off"
           spellCheck={false}
           value={raw}

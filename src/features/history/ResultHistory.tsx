@@ -5,12 +5,14 @@ import { usePatientResults } from '../../api/queries';
 import { EmptyState, ErrorState, LoadingState } from '../../components/AsyncStates';
 import { FlagBadge } from '../../components/FlagBadge';
 import { SEVERITY } from '../../components/severity';
+import { Sparkline } from '../../components/Sparkline';
 import {
   computeChanges,
   formatNumber,
   formatRange,
   isAbnormal,
   type ParameterDefinition,
+  type ParameterId,
   type ReferenceConfig,
   type ValueChange,
 } from '../../domain';
@@ -21,7 +23,6 @@ const ABNORMAL_ONLY_PARAM = 'abnormal';
 interface ResultHistoryProps {
   patient: Patient;
   config: ReferenceConfig;
-  /** Id of an entry saved in this session, to mark it as new. */
   highlightEntryId?: string;
 }
 
@@ -55,8 +56,22 @@ export function ResultHistory({ patient, config, highlightEntryId }: ResultHisto
 
   const parametersById = useMemo(() => new Map(config.parameters.map((p) => [p.id, p])), [config.parameters]);
   const entries = useMemo(() => results.data ?? [], [results.data]);
-  // Changes are computed over every entry, so filtering never changes what a value is compared with.
   const changes = useMemo(() => computeChanges(entries, config.parameters), [entries, config.parameters]);
+
+  const parameterTrends = useMemo(() => {
+    const trends = new Map<ParameterId, number[]>();
+    const chronological = [...entries].sort(
+      (a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt) || a.id.localeCompare(b.id),
+    );
+    for (const entry of chronological) {
+      for (const val of entry.values) {
+        const list = trends.get(val.parameterId) ?? [];
+        list.push(val.value);
+        trends.set(val.parameterId, list);
+      }
+    }
+    return trends;
+  }, [entries]);
 
   const visibleEntries = useMemo(() => {
     if (!onlyAbnormal) return entries;
@@ -135,13 +150,14 @@ export function ResultHistory({ patient, config, highlightEntryId }: ResultHisto
                       <th scope="col">Result</th>
                       <th scope="col">Flag</th>
                       <th scope="col">Normal range</th>
-                      <th scope="col">Change</th>
+                      <th scope="col">Change & Trend</th>
                     </tr>
                   </thead>
                   <tbody>
                     {entry.values.map((value) => {
                       const parameter = parametersById.get(value.parameterId);
                       const decimals = parameter?.decimals ?? 1;
+                      const trendData = parameterTrends.get(value.parameterId);
                       return (
                         <tr key={value.parameterId} className={`results-table__row--${SEVERITY[value.classification]}`}>
                           <th scope="row" data-label="Parameter">
@@ -156,7 +172,21 @@ export function ResultHistory({ patient, config, highlightEntryId }: ResultHisto
                           </td>
                           <td data-label="Normal range">{formatRange(value.referenceRange.normal, decimals)}</td>
                           <td data-label="Change">
-                            <ChangeCell change={entryChanges[value.parameterId]} parameter={parameter} />
+                            <div className="results-table__change-cell">
+                              <ChangeCell change={entryChanges[value.parameterId]} parameter={parameter} />
+                              {trendData && trendData.length >= 2 && (
+                                <Sparkline
+                                  data={trendData}
+                                  color={
+                                    value.classification.startsWith('CRITICAL')
+                                      ? 'var(--critical-fill)'
+                                      : value.classification !== 'NORMAL'
+                                      ? 'var(--abnormal-ink)'
+                                      : 'var(--action)'
+                                  }
+                                />
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );

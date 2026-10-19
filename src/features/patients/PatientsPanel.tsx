@@ -7,23 +7,25 @@ import { formatSex, formatShortDate, pluralize } from '../../lib/format';
 import { CreatePatientForm } from './CreatePatientForm';
 
 function LatestResult({ latest }: { latest: PatientListItem['latestResult'] }) {
-  if (!latest) return <span className="patient-link__latest">No results yet</span>;
+  if (!latest) {
+    return <span className="triage-pill triage-pill--none">No results</span>;
+  }
   const date = formatShortDate(latest.recordedAt);
   if (latest.critical > 0) {
     return (
-      <span className="patient-link__latest patient-link__latest--critical">
-        {latest.critical} critical, {date}
+      <span className="triage-pill triage-pill--critical">
+        ● {latest.critical} Critical · {date}
       </span>
     );
   }
   if (latest.abnormal > 0) {
     return (
-      <span className="patient-link__latest patient-link__latest--abnormal">
-        {pluralize(latest.abnormal, 'value')} flagged, {date}
+      <span className="triage-pill triage-pill--abnormal">
+        ● {pluralize(latest.abnormal, 'flagged')} · {date}
       </span>
     );
   }
-  return <span className="patient-link__latest">All normal, {date}</span>;
+  return <span className="triage-pill triage-pill--normal">✓ Normal · {date}</span>;
 }
 
 export function PatientsPanel() {

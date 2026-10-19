@@ -17,8 +17,8 @@ import { ParameterField } from './ParameterField';
 import { UnsavedChangesGuard } from './UnsavedChangesGuard';
 
 const CATEGORY_TITLES: Record<ParameterCategory, string> = {
-  vitals: 'Vitals',
-  labs: 'Lab results',
+  vitals: '💓 Vitals',
+  labs: '🧪 Lab results',
 };
 
 type RawValues = Partial<Record<ParameterId, string>>;
@@ -100,9 +100,9 @@ export function ResultEntryForm({ patient, config, onSaved }: ResultEntryFormPro
     setRequestId(createRequestId());
     save.reset();
   }
-
+  const isSubmittingRef = useRef(false);
   function submit() {
-    if (isSaving) return;
+    if (isSaving || isSubmittingRef.current) return;
     setSubmitAttempted(true);
     setSavedEntry(null);
 
@@ -112,18 +112,20 @@ export function ResultEntryForm({ patient, config, onSaved }: ResultEntryFormPro
       inputRefs.current.get(target.id)?.focus();
       return;
     }
-
+    isSubmittingRef.current = true;
     const values = Object.fromEntries(assessment.values.map((v) => [v.parameterId, v.value]));
     requestIdUsed.current = true;
     save.mutate(
       { clientRequestId: requestId, values },
       {
         onSuccess: (entry) => {
+          isSubmittingRef.current = false;
           resetDraft();
           setSavedEntry(entry);
           onSaved?.(entry);
         },
         onError: (error) => {
+          isSubmittingRef.current = false;
           if (error instanceof ApiError && error.isValidationError) {
             const mapped: Partial<Record<ParameterId, string>> = {};
             for (const [field, detail] of Object.entries(error.fieldErrors)) {
@@ -184,7 +186,7 @@ export function ResultEntryForm({ patient, config, onSaved }: ResultEntryFormPro
               }.`}
         </p>
 
-        {showNoValuesError && <p className="entry__form-error">{describeEntryError({ code: 'NO_VALUES' })}</p>}
+        {showNoValuesError && <p className="entry__form-error" role="alert" aria-live="assertive">{describeEntryError({ code: 'NO_VALUES' })}</p>}
 
         {save.isError && (
           <div className="notice notice--error" role="alert">

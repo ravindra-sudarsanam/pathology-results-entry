@@ -17,8 +17,9 @@ export function parseNumericInput(raw: string): ParsedInput {
   if (text === '') return { kind: 'empty' };
   if (!NUMERIC_PATTERN.test(text)) return { kind: 'invalid' };
 
-  const value = Number(text);
+  let value = Number(text);
   if (!Number.isFinite(value)) return { kind: 'invalid' };
+  if (Object.is(value, -0)) value = 0;
 
   const fraction = text.split('.')[1] ?? '';
   return { kind: 'number', value, decimalPlaces: fraction.length };

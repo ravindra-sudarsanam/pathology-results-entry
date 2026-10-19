@@ -5,12 +5,16 @@
   box-sizing: border-box;
 }
 
-html {
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Eliminates the outer browser window scrollbar */
   -webkit-text-size-adjust: 100%;
 }
 
 body {
-  margin: 0;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
@@ -74,6 +78,13 @@ a {
 }
 
 /* ---------- Layout ---------- */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .topbar {
   display: flex;
   align-items: baseline;
@@ -82,6 +93,7 @@ a {
   padding: var(--space-3) 10rem var(--space-3) var(--space-5);
   background: var(--ink);
   color: #fff;
+  flex-shrink: 0;
 }
 
 .topbar__brand {
@@ -97,17 +109,29 @@ a {
 .shell {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-  min-height: calc(100vh - 3.25rem);
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .shell__sidebar {
   background: var(--surface);
   border-right: 1px solid var(--rule);
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
 }
 
 .shell__main {
   padding: var(--space-5) var(--space-6) 6rem;
   min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
 }
 
 .shell__main:focus {
@@ -436,8 +460,6 @@ input[readonly] {
 
 /* ---------- Patients sidebar ---------- */
 .patients {
-  position: sticky;
-  top: 0;
   display: grid;
   gap: var(--space-3);
   padding: var(--space-5) var(--space-4);
@@ -640,7 +662,7 @@ input[readonly] {
 }
 
 .param__unit {
-  min-width: 3.5rem;
+flex-shrink: 0;
   color: var(--ink-muted);
   font-size: var(--text-sm);
 }
@@ -812,7 +834,7 @@ input[readonly] {
 /* ---------- Mock API panel (demo tooling) ---------- */
 /* Sits in the top bar's right corner and scrolls away with it, so it never covers form fields. */
 .mock-panel {
-  position: absolute;
+  position: fixed;
   top: 0.5rem;
   right: var(--space-4);
   z-index: 20;
@@ -891,11 +913,20 @@ input[readonly] {
     padding-right: 9rem;
   }
 
+ .app {
+    height: auto;
+    overflow: visible;
+  }
+
   .shell {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
 
   .shell__sidebar {
+    height: auto;
+    overflow-y: visible;
     border-right: 0;
     border-bottom: 1px solid var(--rule);
   }
@@ -910,6 +941,8 @@ input[readonly] {
   }
 
   .shell__main {
+    height: auto;
+    overflow-y: visible;
     padding: var(--space-4) var(--space-4) 6rem;
   }
 
@@ -975,4 +1008,233 @@ input[readonly] {
     content: attr(data-label) ': ';
     color: var(--ink-muted);
   }
+}
+/* ---------- Feature 1: Critical Confirmation Modal ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.critical-modal {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 32rem;
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 2px solid var(--critical-fill);
+  box-shadow: 0 20px 40px rgba(176, 23, 47, 0.18), 0 8px 16px rgba(0, 0, 0, 0.12);
+  animation: slideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.critical-modal__header {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.critical-modal__icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.critical-modal__title {
+  margin: 0 0 0.25rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--critical-fill);
+}
+
+.critical-modal__subtitle {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.critical-modal__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.critical-modal__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-1);
+}
+
+.critical-modal__param-name {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.critical-modal__param-value {
+  color: var(--critical-fill);
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.critical-modal__checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--ink);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--warning-tint);
+  border: 1px solid var(--abnormal-edge);
+}
+
+.critical-modal__checkbox {
+  margin-top: 0.15rem;
+  cursor: pointer;
+}
+
+.critical-modal__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+.critical-modal__confirm-btn {
+  background: var(--critical-fill);
+  color: #fff;
+}
+
+.critical-modal__confirm-btn:hover:not(:disabled) {
+  background: #8b0f24;
+}
+
+.critical-modal__confirm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Feature 2: Sparkline Trend Styling ---------- */
+.results-table__change-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.sparkline-wrapper {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule);
+}
+
+/* ---------- Feature 3: Keyboard Shortcuts Hints ---------- */
+.entry__bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.entry__shortcuts-hint {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.shortcut-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.shortcut-chip kbd {
+  padding: 0.15rem 0.35rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+/* Triage status pills in patient sidebar */
+.triage-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.triage-pill--critical {
+  background: var(--critical-tint);
+  color: var(--critical-fill);
+  border: 1px solid var(--critical-band);
+}
+
+.triage-pill--abnormal {
+  background: var(--abnormal-tint);
+  color: var(--abnormal-ink);
+  border: 1px solid var(--abnormal-edge);
+}
+
+.triage-pill--normal {
+  background: var(--success-tint);
+  color: var(--success-ink);
+  border: 1px solid var(--normal-band);
+}
+
+.triage-pill--none {
+  background: var(--paper);
+  color: var(--ink-muted);
+  border: 1px solid var(--rule);
+}
+/* Highlight the active row being edited */
+.param:focus-within {
+  background: #f4f8fc;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 3px 0 0 var(--action);
+  padding-left: var(--space-2);
+  transition: background 0.15s ease, padding 0.15s ease;
 }

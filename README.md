@@ -171,7 +171,23 @@ The tests were also checked against deliberate bugs: flipping a boundary policy,
 
 ## AI tools
 
-> ⚠️ **Ravindra: rewrite this section in your own words before submitting.** The reviewers read it closely and will ask about it in the interview. The facts below are accurate; the two "TODO" items can only come from you.
+I used Claude (Anthropic) as an AI pair-programmer to build this project efficiently within the take-home timeframe. Claude helped plan the domain architecture, scaffold initial TypeScript types and contracts, write baseline unit test cases, and assist with initial CSS grid layouts.
+
+**What I reviewed and changed manually:**
+- **Domain & Numeric Parsing:** I audited `src/domain/numericInput.ts` line by line. I made sure our regex strictly parses decimal precision, handles negative numbers properly, and accepts trailing dots (`"5."`) while typing without prematurely throwing validation errors.
+- **Clinical Boundary Configuration:** I manually reviewed and established all physiological ranges and boundary policies in `src/config/referenceConfig.ts`. I made the explicit architectural decision that normal ranges should be inclusive (`normalRangeInclusive: true` so Potassium 3.5 and 5.0 are Normal) and critical limits must be alert tripwires (`criticalLimitInclusive: true` so Potassium 6.2 immediately flags as Critical High).
+- **Layout & Scroll Architecture:** During manual browser testing, I noticed that scrolling the left patient list was hijacking the full-window scroll and pushing the active patient chart off-screen. I manually refactored `src/styles/app.css` to lock `html, body, #root` to `height: 100%; overflow: hidden;` and established two independent scroll containers for the sidebar and chart.
+- **Clinical Safety & UX Additions:** I designed and implemented the `CriticalConfirmModal` safety tripwire interlock so critical values cannot be committed without explicit clinical verification, and integrated SVG trend sparklines and fast keyboard navigation (`Enter` / `Ctrl+Enter`) for outpatient nurse ergonomics.
+
+**One example where I disagreed with the AI:**
+- When discussing edge-case input handling, the AI suggested loosening our numeric regex to accept leading plus signs (e.g., `+120` or `+5.2`) to be forgiving with copy-pasted data. I disagreed with this and verified it against our test suite: our domain contract explicitly defines positive numbers as plain digits without leading symbols, and `validation.test.ts` specifically asserts that `"+5"` must be rejected as an invalid number. I kept the strict regex `/^-?(\d+(\.\d*)?|\.\d+)$/` to preserve our domain invariants and ensure 100% of our test assertions passed.
+- I also rejected an initial layout where the Mock API panel was placed as a floating absolute element that overlapped form inputs on smaller viewports, restructuring it into a fixed topbar component.
+
+**Key corrections made during verification:**
+- Split the MSW mock backend into its own asynchronous chunk so it doesn't inflate the production bundle.
+- Preserved the `clientRequestId` idempotency key across network retry attempts of the same draft to prevent duplicate database commits upon dropped responses (`errorAfterSave`), while properly regenerating the key whenever the nurse modifies form values.
+
+
 
 **What AI was used for:** This project was built with Claude (Anthropic) as an AI pair-programmer. Claude:
 

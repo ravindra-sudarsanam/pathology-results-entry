@@ -38,21 +38,45 @@ export function PatientPage() {
 
   return (
     <article className="patient-page" aria-labelledby="patient-name">
-      <header className="patient-header">
-        <h1 id="patient-name" className="patient-header__name">
-          {data.name}
-        </h1>
-        <dl className="patient-header__facts">
-          <div>
-            <dt>Age</dt>
-            <dd>{data.age}</dd>
-          </div>
-          <div>
-            <dt>Sex</dt>
-            <dd>{formatSex(data.sex)}</dd>
-          </div>
-        </dl>
-      </header>
+      <header className="patient-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+  <div
+    style={{
+      width: '3rem',
+      height: '3rem',
+      borderRadius: '50%',
+      background: 'var(--action)',
+      color: '#fff',
+      display: 'grid',
+      placeItems: 'center',
+      fontWeight: 700,
+      fontSize: '1.25rem',
+      flexShrink: 0,
+      boxShadow: '0 2px 6px rgba(29, 78, 137, 0.25)',
+    }}
+    aria-hidden="true"
+  >
+    {data.name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')}
+  </div>
+  <div>
+    <h1 id="patient-name" className="patient-header__name">
+      {data.name}
+    </h1>
+    <dl className="patient-header__facts" style={{ marginTop: '0.25rem' }}>
+      <div>
+        <dt>Age</dt>
+        <dd>{data.age}</dd>
+      </div>
+      <div>
+        <dt>Sex</dt>
+        <dd>{formatSex(data.sex)}</dd>
+      </div>
+    </dl>
+  </div>
+</header>
 
       {config.isPending && <LoadingState label="Loading reference ranges…" lines={6} />}
       {config.isError && (

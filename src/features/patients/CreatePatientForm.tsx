@@ -56,11 +56,13 @@ export function CreatePatientForm({ onCreated, onCancel }: CreatePatientFormProp
         <label htmlFor="new-patient-name">Full name</label>
         <input
           id="new-patient-name"
+          autoFocus
           autoComplete="off"
           value={draft.name}
           aria-invalid={errors.name ? true : undefined}
           aria-describedby={errors.name ? 'new-patient-name-error' : undefined}
           onChange={(event) => update('name', event.target.value)}
+          onBlur={()=> update('name', draft.name.trim().replace(/\s+/g, ' '))}
         />
         {errors.name && (
           <p id="new-patient-name-error" className="field__error">
